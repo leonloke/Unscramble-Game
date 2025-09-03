@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unscramble!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .players-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .player {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            width: 45%;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .player.active {
+            background: #e3f2fd;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+            transform: scale(1.03);
+        }
+        
+        .player h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .player-name {
+            border: none;
+            background: transparent;
+            font-size: 1.5rem;
+            text-align: center;
+            width: auto;
+            max-width: 120px;
+            padding: 5px;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+        
+        .player-name:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 2px #2196f3;
+        }
+        
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        .time-bank {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            color: #e74c3c;
+        }
+        
+        .game-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .scrambled-word {
+            font-size: 2.5rem;
+            letter-spacing: 8px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            color: #2c3e50;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .answer-display {
+            font-size: 2rem;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .correct-answer {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .pass-answer {
+            background: #ffebee;
+            color: #c62828;
+            font-weight: bold;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .key-shortcut {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #555;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        #correctBtn {
+            background: #4caf50;
+            color: white;
+        }
+        
+        #correctBtn:hover {
+            background: #388e3c;
+            transform: translateY(-3px);
+        }
+        
+        #passBtn {
+            background: #f44336;
+            color: white;
+        }
+        
+        #passBtn:hover {
+            background: #d32f2f;
+            transform: translateY(-3px);
+        }
+        
+        #startBtn {
+            background: #2196f3;
+            color: white;
+            padding: 15px 40px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        #startBtn:hover {
+            background: #1976d2;
+            transform: translateY(-3px);
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .instructions li:before {
+            content: "•";
+            color: #2196f3;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .game-over {
+            text-align: center;
+            padding: 20px;
+            background: #fff8e1;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .game-over h2 {
+            color: #f57c00;
+            margin-bottom: 15px;
+        }
+        
+        .settings {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .settings h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .settings label {
+            display: block;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .settings input {
+            padding: 8px;
+            width: 80px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .word-bank {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .word-bank h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .add-words {
+            margin-bottom: 15px;
+        }
+        
+        .add-words textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 10px;
+        }
+        
+        .add-words input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .add-words button {
+            padding: 8px 15px;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+        
+        .word-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .word-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .word-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-btn {
+            color: #f44336;
+            cursor: pointer;
+            padding: 0 5px;
+            font-size: 1.5rem;
+        }
+        
+        .keyboard-hint {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-button {
+            padding: 10px 15px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .tab-button.active {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .input-hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .players-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .player {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+            
+            .scrambled-word {
+                font-size: 2rem;
+                letter-spacing: 5px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+            }
+            
+            .player-name {
+                max-width: 100px;
+            }
+            
+            .settings label {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .settings input {
+                width: 100%;
+                margin-top: 5px;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .tab-button {
+                border-radius: 5px;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Unscramble!</h1>
+    
+    <div class="container">
+        <div class="settings">
+            <h3>Game Settings</h3>
+            <label>
+                Initial Time (seconds):
+                <input type="number" id="initialTime" value="60" min="10" max="300">
+            </label>
+            <label>
+                Pass Penalty (seconds):
+                <input type="number" id="passPenalty" value="5" min="0" max="30">
+            </label>
+        </div>
+        
+        <div class="players-container">
+            <div class="player" id="player1">
+                <h2>
+                    <span>Player</span>
+                    <input type="text" class="player-name" id="player1Name" value="Player 1" maxlength="12">
+                </h2>
+                <div class="score">0</div>
+                <div class="time-bank">Time: 60.0s</div>
+            </div>
+            <div class="player" id="player2">
+                <h2>
+                    <span>Player</span>
+                    <input type="text" class="player-name" id="player2Name" value="Player 2" maxlength="12">
+                </h2>
+                <div class="score">0</div>
+                <div class="time-bank">Time: 60.0s</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="scrambled-word" id="scrambledWord">Add words and click Start</div>
+            <div class="answer-display" id="answerDisplay"></div>
+            
+            <div class="controls">
+                <button id="correctBtn" disabled>
+                    <span class="key-shortcut">←</span>
+                    Correct!
+                </button>
+                <button id="passBtn" disabled>
+                    <span class="key-shortcut">→</span>
+                    Pass
+                </button>
+            </div>
+            
+            <div class="keyboard-hint">
+                Use keyboard shortcuts: ← for Correct, → for Pass
+            </div>
+            
+            <button id="startBtn">Start Game</button>
+        </div>
+        
+        <div class="game-over" id="gameOver">
+            <h2>Game Over!</h2>
+            <p id="winnerMessage"></p>
+            <button id="restartBtn">Play Again</button>
+        </div>
+        
+        <div class="word-bank">
+            <h3>Word Bank <span style="font-size: 0.8rem; font-weight: normal;">(Total: <span id="wordCount">0</span>)</span></h3>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="single">Add Single Word</button>
+                <button class="tab-button" data-tab="bulk">Bulk Add (New Lines)</button>
+                <button class="tab-button" data-tab="csv">Bulk Add (Comma Separated)</button>
+            </div>
+            
+            <div class="tab-content active" id="singleTab">
+                <div class="add-words">
+                    <input type="text" id="newWord" placeholder="Enter a word or phrase">
+                    <div class="input-hint">All text will be converted to lowercase and whitespace will be ignored</div>
+                    <button id="addWordBtn">Add Word</button>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="bulkTab">
+                <div class="add-words">
+                    <textarea id="bulkWords" placeholder="Enter multiple words or phrases, one per line"></textarea>
+                    <div class="input-hint">All text will be converted to lowercase and whitespace will be ignored</div>
+                    <button id="addBulkBtn">Add All Words</button>
+                    <button id="clearBulkBtn">Clear</button>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="csvTab">
+                <div class="add-words">
+                    <textarea id="csvWords" placeholder="Enter words separated by commas (e.g., apple,banana,cherry)"></textarea>
+                    <div class="input-hint">All text will be converted to lowercase and whitespace will be ignored</div>
+                    <button id="addCsvBtn">Add All Words</button>
+                    <button id="clearCsvBtn">Clear</button>
+                </div>
+            </div>
+            
+            <div class="word-list" id="wordList">
+                <p class="no-words">No words added yet</p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Game Rules</h3>
+            <ul>
+                <li>Players take turns guessing scrambled words or phrases</li>
+                <li>Click "Correct!" to get 1 point and show the correct answer (green)</li>
+                <li>Click "Pass" to skip the word, show the answer (red) and deduct time</li>
+                <li>Each player has an individual time bank - game ends when time runs out</li>
+                <li>Time only decreases during guessing, not when answers are shown</li>
+                <li>Words won't repeat during the same game</li>
+                <li>Use keyboard shortcuts: ← for Correct, → for Pass</li>
+                <li>All text input is converted to lowercase and whitespace is ignored</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game elements
+            const scrambledWordElement = document.getElementById('scrambledWord');
+            const answerDisplayElement = document.getElementById('answerDisplay');
+            const correctBtn = document.getElementById('correctBtn');
+            const passBtn = document.getElementById('passBtn');
+            const startBtn = document.getElementById('startBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const gameOverElement = document.getElementById('gameOver');
+            const winnerMessageElement = document.getElementById('winnerMessage');
+            const player1Element = document.getElementById('player1');
+            const player2Element = document.getElementById('player2');
+            const player1ScoreElement = player1Element.querySelector('.score');
+            const player2ScoreElement = player2Element.querySelector('.score');
+            const player1TimeElement = player1Element.querySelector('.time-bank');
+            const player2TimeElement = player2Element.querySelector('.time-bank');
+            const player1NameElement = document.getElementById('player1Name');
+            const player2NameElement = document.getElementById('player2Name');
+            const initialTimeInput = document.getElementById('initialTime');
+            const passPenaltyInput = document.getElementById('passPenalty');
+            const wordListElement = document.getElementById('wordList');
+            const wordCountElement = document.getElementById('wordCount');
+            const newWordInput = document.getElementById('newWord');
+            const addWordBtn = document.getElementById('addWordBtn');
+            const bulkWordsTextarea = document.getElementById('bulkWords');
+            const addBulkBtn = document.getElementById('addBulkBtn');
+            const clearBulkBtn = document.getElementById('clearBulkBtn');
+            const csvWordsTextarea = document.getElementById('csvWords');
+            const addCsvBtn = document.getElementById('addCsvBtn');
+            const clearCsvBtn = document.getElementById('clearCsvBtn');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Game state
+            let currentPlayer = 1;
+            let player1Score = 0;
+            let player2Score = 0;
+            let player1Time = 60.0;
+            let player2Time = 60.0;
+            let timerInterval = null;
+            let gameActive = false;
+            let answerTimeout = null;
+            let lastTimerUpdate = 0;
+            let usedWords = [];
+            let availableWords = [];
+            
+            let currentWord = "";
+            
+            // Function to normalize text (convert to lowercase and remove whitespace)
+            function normalizeText(text) {
+                return text.toLowerCase().replace(/\s+/g, '');
+            }
+            
+            // Function to format word for display (show normalized version)
+            function formatWordForDisplay(word) {
+                return normalizeText(word);
+            }
+            
+            // Initialize word bank
+            function initWordBank() {
+                // Load words from localStorage
+                const savedWords = localStorage.getItem('wordBank');
+                if (savedWords) {
+                    availableWords = JSON.parse(savedWords);
+                }
+                
+                // Load player names from localStorage
+                const savedPlayer1Name = localStorage.getItem('player1Name');
+                const savedPlayer2Name = localStorage.getItem('player2Name');
+                
+                if (savedPlayer1Name) player1NameElement.value = savedPlayer1Name;
+                if (savedPlayer2Name) player2NameElement.value = savedPlayer2Name;
+                
+                updateWordList();
+            }
+            
+            // Update the word list display
+            function updateWordList() {
+                wordListElement.innerHTML = '';
+                wordCountElement.textContent = availableWords.length;
+                
+                if (availableWords.length === 0) {
+                    wordListElement.innerHTML = '<p class="no-words">No words added yet</p>';
+                    return;
+                }
+                
+                availableWords.forEach((word, index) => {
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'word-item';
+                    wordItem.innerHTML = `
+                        <span>${formatWordForDisplay(word)}</span>
+                        <span class="remove-btn" data-index="${index}">×</span>
+                    `;
+                    wordListElement.appendChild(wordItem);
+                });
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        removeWord(index);
+                    });
+                });
+            }
+            
+            // Add a new word
+            function addWord() {
+                const newWord = newWordInput.value.trim();
+                if (newWord.length === 0) {
+                    alert('Please enter a word or phrase.');
+                    return;
+                }
+                
+                const normalizedWord = normalizeText(newWord);
+                
+                // Check if word already exists (using normalized comparison)
+                const exists = availableWords.some(word => normalizeText(word) === normalizedWord);
+                
+                if (exists) {
+                    alert('This word is already in the bank.');
+                    return;
+                }
+                
+                // Store the normalized version
+                availableWords.push(normalizedWord);
+                localStorage.setItem('wordBank', JSON.stringify(availableWords));
+                updateWordList();
+                newWordInput.value = '';
+                newWordInput.focus();
+            }
+            
+            // Add words in bulk (newline separated)
+            function addBulkWords() {
+                const bulkText = bulkWordsTextarea.value.trim();
+                if (bulkText.length === 0) {
+                    alert('Please enter some words or phrases.');
+                    return;
+                }
+                
+                const words = bulkText.split('\n')
+                    .map(word => word.trim())
+                    .filter(word => word.length > 0);
+                
+                if (words.length === 0) {
+                    alert('No valid words found. Please enter one word or phrase per line.');
+                    return;
+                }
+                
+                let addedCount = 0;
+                for (const word of words) {
+                    const normalizedWord = normalizeText(word);
+                    
+                    // Check if word already exists (using normalized comparison)
+                    const exists = availableWords.some(w => normalizeText(w) === normalizedWord);
+                    
+                    if (!exists) {
+                        availableWords.push(normalizedWord);
+                        addedCount++;
+                    }
+                }
+                
+                localStorage.setItem('wordBank', JSON.stringify(availableWords));
+                updateWordList();
+                
+                alert(`Added ${addedCount} new words. ${words.length - addedCount} words were duplicates.`);
+                bulkWordsTextarea.value = '';
+            }
+            
+            // Add words from CSV input
+            function addCsvWords() {
+                const csvText = csvWordsTextarea.value.trim();
+                if (csvText.length === 0) {
+                    alert('Please enter some words or phrases separated by commas.');
+                    return;
+                }
+                
+                const words = csvText.split(',')
+                    .map(word => word.trim())
+                    .filter(word => word.length > 0);
+                
+                if (words.length === 0) {
+                    alert('No valid words found. Please enter words separated by commas.');
+                    return;
+                }
+                
+                let addedCount = 0;
+                for (const word of words) {
+                    const normalizedWord = normalizeText(word);
+                    
+                    // Check if word already exists (using normalized comparison)
+                    const exists = availableWords.some(w => normalizeText(w) === normalizedWord);
+                    
+                    if (!exists) {
+                        availableWords.push(normalizedWord);
+                        addedCount++;
+                    }
+                }
+                
+                localStorage.setItem('wordBank', JSON.stringify(availableWords));
+                updateWordList();
+                
+                alert(`Added ${addedCount} new words. ${words.length - addedCount} words were duplicates.`);
+                csvWordsTextarea.value = '';
+            }
+            
+            // Remove a word
+            function removeWord(index) {
+                availableWords.splice(index, 1);
+                localStorage.setItem('wordBank', JSON.stringify(availableWords));
+                updateWordList();
+            }
+            
+            // Tab switching
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Update active tab content
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // Function to scramble a word/phrase (don't split phrases into words)
+            function scrambleWord(word) {
+                // Scramble the entire string as a whole, don't split into words
+                const characters = word.split('');
+                for (let i = characters.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [characters[i], characters[j]] = [characters[j], characters[i]];
+                }
+                return characters.join('');
+            }
+            
+            // Function to start the game
+            function startGame() {
+                if (availableWords.length < 2) {
+                    alert('Please add at least 2 words to start the game.');
+                    return;
+                }
+                
+                // Save player names
+                localStorage.setItem('player1Name', player1NameElement.value);
+                localStorage.setItem('player2Name', player2NameElement.value);
+                
+                gameActive = true;
+                player1Time = parseFloat(initialTimeInput.value);
+                player2Time = parseFloat(initialTimeInput.value);
+                player1Score = 0;
+                player2Score = 0;
+                currentPlayer = 1;
+                usedWords = [];
+                
+                player1ScoreElement.textContent = "0";
+                player2ScoreElement.textContent = "0";
+                player1TimeElement.textContent = `Time: ${player1Time.toFixed(1)}s`;
+                player2TimeElement.textContent = `Time: ${player2Time.toFixed(1)}s`;
+                
+                player1Element.classList.add('active');
+                player2Element.classList.remove('active');
+                
+                correctBtn.disabled = false;
+                passBtn.disabled = false;
+                startBtn.disabled = true;
+                initialTimeInput.disabled = true;
+                passPenaltyInput.disabled = true;
+                player1NameElement.disabled = true;
+                player2NameElement.disabled = true;
+                gameOverElement.style.display = 'none';
+                
+                // Clear any answer display
+                answerDisplayElement.textContent = "";
+                answerDisplayElement.className = "answer-display";
+                
+                // Start with a random word
+                nextWord();
+                
+                // Start the timer for the first player
+                lastTimerUpdate = Date.now();
+                startTimer();
+            }
+            
+            // Function to handle next word
+            function nextWord() {
+                // Filter out used words (using normalized comparison)
+                const unusedWords = availableWords.filter(word => 
+                    !usedWords.some(used => normalizeText(used) === normalizeText(word))
+                );
+                
+                if (unusedWords.length === 0) {
+                    endGame("All words have been used!");
+                    return;
+                }
+                
+                const randomIndex = Math.floor(Math.random() * unusedWords.length);
+                currentWord = unusedWords[randomIndex];
+                usedWords.push(currentWord);
+                
+                scrambledWordElement.textContent = scrambleWord(currentWord);
+            }
+            
+            // Function to start the timer for the current player
+            function startTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                timerInterval = setInterval(() => {
+                    if (!gameActive) return;
+                    
+                    const now = Date.now();
+                    const delta = (now - lastTimerUpdate) / 1000; // Convert to seconds
+                    lastTimerUpdate = now;
+                    
+                    if (currentPlayer === 1) {
+                        player1Time -= delta;
+                        player1TimeElement.textContent = `Time: ${Math.max(0, player1Time).toFixed(1)}s`;
+                        
+                        if (player1Time <= 0) {
+                            endGame(`${player1NameElement.value} ran out of time!`);
+                        }
+                    } else {
+                        player2Time -= delta;
+                        player2TimeElement.textContent = `Time: ${Math.max(0, player2Time).toFixed(1)}s`;
+                        
+                        if (player2Time <= 0) {
+                            endGame(`${player2NameElement.value} ran out of time!`);
+                        }
+                    }
+                }, 100);
+            }
+            
+            // Function to stop the timer
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+            
+            // Function to display answer
+            function displayAnswer(isCorrect) {
+                // Stop the timer while showing the answer
+                stopTimer();
+                
+                answerDisplayElement.textContent = `Correct answer: ${formatWordForDisplay(currentWord)}`;
+                answerDisplayElement.className = isCorrect ? 
+                    "answer-display correct-answer" : "answer-display pass-answer";
+                
+                // Clear any existing timeout
+                if (answerTimeout) {
+                    clearTimeout(answerTimeout);
+                }
+                
+                // Disable buttons temporarily
+                correctBtn.disabled = true;
+                passBtn.disabled = true;
+                
+                // Set timeout to continue game after showing answer
+                answerTimeout = setTimeout(() => {
+                    answerDisplayElement.textContent = "";
+                    answerDisplayElement.className = "answer-display";
+                    
+                    // Check if all words have been used
+                    const unusedWords = availableWords.filter(word => 
+                        !usedWords.some(used => normalizeText(used) === normalizeText(word))
+                    );
+                    
+                    if (unusedWords.length === 0) {
+                        endGame("All words have been used!");
+                        return;
+                    }
+                    
+                    // Update last timer update time before restarting
+                    lastTimerUpdate = Date.now();
+                    
+                    if (isCorrect) {
+                        // After correct answer, switch player and show next word
+                        switchPlayer();
+                        nextWord();
+                    } else {
+                        // After pass, just show next word for same player
+                        nextWord();
+                    }
+                    
+                    // Re-enable buttons and restart timer
+                    correctBtn.disabled = false;
+                    passBtn.disabled = false;
+                    startTimer();
+                }, 2000);
+            }
+            
+            // Function to switch player
+            function switchPlayer() {
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                
+                if (currentPlayer === 1) {
+                    player1Element.classList.add('active');
+                    player2Element.classList.remove('active');
+                } else {
+                    player1Element.classList.remove('active');
+                    player2Element.classList.add('active');
+                }
+                
+                // Update timer display when switching players
+                player1TimeElement.textContent = `Time: ${player1Time.toFixed(1)}s`;
+                player2TimeElement.textContent = `Time: ${player2Time.toFixed(1)}s`;
+            }
+            
+            // Function to handle correct answer
+            function handleCorrect() {
+                if (!gameActive) return;
+                
+                if (currentPlayer === 1) {
+                    player1Score++;
+                    player1ScoreElement.textContent = player1Score;
+                } else {
+                    player2Score++;
+                    player2ScoreElement.textContent = player2Score;
+                }
+                
+                // Display answer in green
+                displayAnswer(true);
+            }
+            
+            // Function to handle pass
+            function handlePass() {
+                if (!gameActive) return;
+                
+                // Apply time penalty
+                const penalty = parseFloat(passPenaltyInput.value);
+                if (currentPlayer === 1) {
+                    player1Time -= penalty;
+                    player1TimeElement.textContent = `Time: ${player1Time.toFixed(1)}s`;
+                    if (player1Time <= 0) {
+                        endGame(`${player1NameElement.value} ran out of time!`);
+                        return;
+                    }
+                } else {
+                    player2Time -= penalty;
+                    player2TimeElement.textContent = `Time: ${player2Time.toFixed(1)}s`;
+                    if (player2Time <= 0) {
+                        endGame(`${player2NameElement.value} ran out of time!`);
+                        return;
+                    }
+                }
+                
+                // Display answer in red
+                displayAnswer(false);
+            }
+            
+            // Function to end the game
+            function endGame(reason = "") {
+                gameActive = false;
+                stopTimer();
+                if (answerTimeout) {
+                    clearTimeout(answerTimeout);
+                }
+                
+                correctBtn.disabled = true;
+                passBtn.disabled = true;
+                startBtn.disabled = false;
+                initialTimeInput.disabled = false;
+                passPenaltyInput.disabled = false;
+                player1NameElement.disabled = false;
+                player2NameElement.disabled = false;
+                
+                // Determine winner
+                let winnerMessage = "";
+                if (player1Score > player2Score) {
+                    winnerMessage = `${player1NameElement.value} wins!`;
+                } else if (player2Score > player1Score) {
+                    winnerMessage = `${player2NameElement.value} wins!`;
+                } else if (player1Time > player2Time) {
+                    winnerMessage = `${player1NameElement.value} wins (tie but more time left)!`;
+                } else if (player2Time > player1Time) {
+                    winnerMessage = `${player2NameElement.value} wins (tie but more time left)!`;
+                } else {
+                    winnerMessage = "It's a tie!";
+                }
+                
+                if (reason) {
+                    winnerMessage = `${reason} ${winnerMessage}`;
+                }
+                
+                winnerMessageElement.textContent = `${winnerMessage} Final Score: ${player1NameElement.value}: ${player1Score} - ${player2NameElement.value}: ${player2Score}`;
+                gameOverElement.style.display = 'block';
+                
+                // Scroll to game over message
+                gameOverElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Initialize the game
+            initWordBank();
+            
+            // Event listeners
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', startGame);
+            correctBtn.addEventListener('click', handleCorrect);
+            passBtn.addEventListener('click', handlePass);
+            addWordBtn.addEventListener('click', addWord);
+            addBulkBtn.addEventListener('click', addBulkWords);
+            clearBulkBtn.addEventListener('click', () => {
+                bulkWordsTextarea.value = '';
+            });
+            addCsvBtn.addEventListener('click', addCsvWords);
+            clearCsvBtn.addEventListener('click', () => {
+                csvWordsTextarea.value = '';
+            });
+            
+            // Allow adding words with Enter key
+            newWordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addWord();
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (!gameActive) return;
+                
+                if (e.key === 'ArrowLeft') {
+                    handleCorrect();
+                    // Visual feedback
+                    correctBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        correctBtn.style.transform = '';
+                    }, 100);
+                } else if (e.key === 'ArrowRight') {
+                    handlePass();
+                    // Visual feedback
+                    passBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        passBtn.style.transform = '';
+                    }, 100);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
